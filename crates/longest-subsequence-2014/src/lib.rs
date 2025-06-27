@@ -10,12 +10,17 @@ impl Solution {
             return "".to_string();
         }
 
-        let length = f32::ceil(s.len() as f32 / k as f32) as usize;
-        let substring = &s[..length];
+        let substring = &s[..s.len() - k as usize + 1];
 
         let s_bytes = s.as_bytes();
 
+        let mut best_result = BestResult::new();
+
         for subseq in SubsequenceGenerator::new(substring.as_bytes()) {
+            if subseq.len() < best_result.len() {
+                continue;
+            }
+
             let mut times_present = 0;
             let subseq_bytes = subseq.as_slice();
 
@@ -30,12 +35,59 @@ impl Solution {
                 }
 
                 if times_present == k {
-                    return String::from_utf8(subseq_bytes.to_vec()).unwrap();
+                    break;
                 }
+            }
+
+            if times_present == k {
+                best_result.replace_if_better(subseq);
             }
         }
 
-        "".to_string()
+        best_result.to_string()
+    }
+}
+
+struct BestResult {
+    best_result: Vec<u8>,
+}
+
+impl BestResult {
+    fn new() -> Self {
+        Self {
+            best_result: Vec::new(),
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.best_result.is_empty()
+    }
+
+    fn len(&self) -> usize {
+        self.best_result.len()
+    }
+
+    fn replace(&mut self, new_result: Vec<u8>) {
+        self.best_result = new_result;
+    }
+
+    fn replace_if_better(&mut self, new_result: Vec<u8>) {
+        if new_result.len() > self.len() {
+            self.best_result = new_result;
+        } else if new_result.len() == self.len() {
+            for i in 0..new_result.len() {
+                if new_result[i] > self.best_result[i] {
+                    self.best_result = new_result;
+                    break;
+                } else if new_result[i] < self.best_result[i] {
+                    return;
+                }
+            }
+        }
+    }
+
+    fn to_string(self) -> String {
+        String::from_utf8(self.best_result).unwrap()
     }
 }
 
@@ -87,6 +139,23 @@ mod tests {
     use super::*;
 
     #[test]
+    fn replace_if_better() {
+        let ete = "ete".as_bytes().to_vec();
+        let r#let = "let".as_bytes().to_vec();
+
+        let mut container = BestResult::new();
+
+        container.replace_if_better(ete.clone());
+        assert_eq!(container.best_result, ete);
+
+        container.replace_if_better(r#let.clone());
+        assert_eq!(container.best_result, r#let);
+
+        container.replace_if_better(ete.clone());
+        assert_eq!(container.best_result, r#let);
+    }
+
+    #[test]
     fn test_seq_generator() {
         let og_string = "abc".to_string();
         let mut generator = SubsequenceGenerator::new(og_string.as_bytes());
@@ -127,6 +196,13 @@ mod tests {
         assert_eq!(
             Solution::longest_subsequence_repeated_k("bbabbabbbbabaababab".to_string(), 3),
             "bbbb".to_string()
+        );
+        assert_eq!(
+            Solution::longest_subsequence_repeated_k(
+                "tdpvgkahikgkkgkkkegwkkzgkkgkk".to_string(),
+                6
+            ),
+            "gkk".to_string()
         );
     }
 }
