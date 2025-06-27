@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::collections::HashSet;
 use std::vec;
 
 struct Solution;
@@ -10,15 +11,32 @@ impl Solution {
             return "".to_string();
         }
 
-        let substring = &s[..s.len() - k as usize + 1];
+        let mut valid_chars = s
+            .chars()
+            .into_iter()
+            .filter(|ch| s.chars().into_iter().filter(|c| c == ch).count() >= k as usize)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .map(|ch| ch as u8)
+            .collect::<Vec<u8>>();
+
+        if valid_chars.is_empty() {
+            return "".to_string();
+        }
+
+        valid_chars.sort_by_key(|&ch1| b'z' - ch1);
+
+        let valid_chars: String = String::from_utf8(valid_chars).unwrap();
+
+        println!("{:?}", valid_chars);
 
         let s_bytes = s.as_bytes();
 
         let mut best_result = BestResult::new();
 
-        for subseq in SubsequenceGenerator::new(substring.as_bytes()) {
+        for subseq in SubsequenceGenerator::new(valid_chars.as_bytes()) {
             if subseq.len() < best_result.len() {
-                continue;
+                break;
             }
 
             let mut times_present = 0;
@@ -91,52 +109,137 @@ impl BestResult {
     }
 }
 
-struct SubsequenceGenerator<'a, T> {
+struct SubsequenceGenerator<'a, T: Copy> {
     items: &'a [T],
-    step: u32,
+    numbers: Vec<u32>,
+    items_iter: std::iter::Enumerate<std::slice::Iter<'a, T>>,
+    permutations_iter: Option<PermutationIterator<T>>,
+    start_index: usize,
 }
 
-impl<'a, T> SubsequenceGenerator<'a, T> {
+impl<'a, T: Copy> SubsequenceGenerator<'a, T> {
     fn new(s: &'a [T]) -> Self {
+        let mut numbers: Vec<u32> = (0..=((1 << s.len()) - 1)).collect();
+
+        numbers.sort_by_key(|&x| x.count_ones());
+
         Self {
             items: s,
-            step: u32::pow(2, s.len() as u32) - 1,
+            numbers,
+            items_iter: s.iter().enumerate(),
+            permutations_iter: None,
+            start_index: s.len() - 1,
         }
     }
 }
 
 impl<'a, T> Iterator for SubsequenceGenerator<'a, T>
 where
-    T: Clone,
+    T: Clone + Copy,
 {
     type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.step == 0 {
+        if let Some(iter) = self.permutations_iter.as_mut() {
+            if let Some(perm) = iter.next() {
+                return Some(perm);
+            }
+        }
+
+        let mask = self.numbers.pop().unwrap();
+
+        if mask == 0 {
             return None;
         }
 
         let mut vec = vec![];
 
-        let start_index = self.items.len() - 1;
-
-        // TODO: Improve the iterator to generate the larger subsequences first
-
-        for (i, item) in self.items.iter().enumerate() {
-            let item_pos = u32::pow(2, (start_index - i) as u32);
-            if item_pos & self.step > 0 {
+        for (i, item) in self.items_iter.clone() {
+            let item_pos = 1 << self.start_index - i;
+            if item_pos & mask > 0 {
                 vec.push(item.clone());
             }
         }
 
-        self.step -= 1;
-        Some(vec)
+        let mut iterator = PermutationIterator::new(&vec);
+
+        let val = if let Some(perm) = iterator.next() {
+            Some(perm)
+        } else { 
+            None
+        };
+        
+        self.permutations_iter = Some(iterator);
+        
+        val
+    }
+}
+
+struct PermutationIterator<T>
+where T: Copy + Clone {
+    chars: Vec<T>,
+    c: Vec<usize>,
+    i: usize,
+    first: bool,
+}
+
+impl<T> PermutationIterator<T> 
+where T: Copy + Clone {
+    pub fn new(input: &[T]) -> Self {
+        let n = input.len();
+        Self {
+            chars: input.to_vec(),
+            c: vec![0; n],
+            i: 0,
+            first: true,
+        }
+    }
+}
+
+impl<T> Iterator for PermutationIterator<T> 
+where T: Copy + Clone {
+    type Item = Vec<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.first {
+            self.first = false;
+            return Some(self.chars.clone().into_iter().collect());
+        }
+
+        let n = self.chars.len();
+
+        while self.i < n {
+            if self.c[self.i] < self.i {
+                if self.i & 1 == 0 {
+                    self.chars.swap(0, self.i);
+                } else {
+                    self.chars.swap(self.c[self.i], self.i);
+                }
+                self.c[self.i] += 1;
+                self.i = 0;
+                return Some(self.chars.clone().into_iter().collect());
+            } else {
+                self.c[self.i] = 0;
+                self.i += 1;
+            }
+        }
+
+        None
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn permute_test() {
+        let s = PermutationIterator::new("abc".as_bytes());
+
+        for a in s {
+            println!("{:?}", a);
+        }
+    }
 
     #[test]
     fn replace_if_better() {
@@ -163,13 +266,20 @@ mod tests {
             generator.next(),
             Some("abc".to_string().as_bytes().to_vec())
         );
+        assert_eq!(generator.next(), Some("bac".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("cab".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("acb".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("bca".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("cba".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("ab".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("ba".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("ac".to_string().as_bytes().to_vec()));
-        assert_eq!(generator.next(), Some("a".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("ca".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("bc".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("cb".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("a".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("b".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("c".to_string().as_bytes().to_vec()));
-
         assert_eq!(generator.next(), None);
     }
 
