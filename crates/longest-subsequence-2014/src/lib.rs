@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::vec;
+
 struct Solution;
 
 impl Solution {
@@ -13,9 +15,9 @@ impl Solution {
 
         let s_bytes = s.as_bytes();
 
-        for subseq in SubsequenceGenerator::new(substring) {
+        for subseq in SubsequenceGenerator::new(substring.as_bytes()) {
             let mut times_present = 0;
-            let subseq_bytes = subseq.as_bytes();
+            let subseq_bytes = subseq.as_slice();
 
             let mut index = 0;
             for &byte in s_bytes {
@@ -28,7 +30,7 @@ impl Solution {
                 }
 
                 if times_present == k {
-                    return subseq;
+                    return String::from_utf8(subseq_bytes.to_vec()).unwrap();
                 }
             }
         }
@@ -37,41 +39,46 @@ impl Solution {
     }
 }
 
-struct SubsequenceGenerator<'a> {
-    s: &'a str,
+struct SubsequenceGenerator<'a, T> {
+    items: &'a [T],
     step: u32,
 }
 
-impl<'a> SubsequenceGenerator<'a> {
-    fn new(s: &'a str) -> Self {
+impl<'a, T> SubsequenceGenerator<'a, T> {
+    fn new(s: &'a [T]) -> Self {
         Self {
-            s,
+            items: s,
             step: u32::pow(2, s.len() as u32) - 1,
         }
     }
 }
 
-impl Iterator for SubsequenceGenerator<'_> {
-    type Item = String;
+impl<'a, T> Iterator for SubsequenceGenerator<'a, T>
+where
+    T: Clone,
+{
+    type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.step == 0 {
             return None;
         }
 
-        let mut string = String::new();
+        let mut vec = vec![];
 
-        let start_index = self.s.len() - 1;
+        let start_index = self.items.len() - 1;
 
-        for (i, char) in self.s.chars().enumerate() {
-            let char_pos = u32::pow(2, (start_index - i) as u32);
-            if char_pos & self.step > 0 {
-                string.push(char);
+        // TODO: Improve the iterator to generate the larger subsequences first
+
+        for (i, item) in self.items.iter().enumerate() {
+            let item_pos = u32::pow(2, (start_index - i) as u32);
+            if item_pos & self.step > 0 {
+                vec.push(item.clone());
             }
         }
 
         self.step -= 1;
-        Some(string)
+        Some(vec)
     }
 }
 
@@ -81,14 +88,18 @@ mod tests {
 
     #[test]
     fn test_seq_generator() {
-        let mut generator = SubsequenceGenerator::new("abc");
-        assert_eq!(generator.next(), Some("abc".to_string()));
-        assert_eq!(generator.next(), Some("ab".to_string()));
-        assert_eq!(generator.next(), Some("ac".to_string()));
-        assert_eq!(generator.next(), Some("a".to_string()));
-        assert_eq!(generator.next(), Some("bc".to_string()));
-        assert_eq!(generator.next(), Some("b".to_string()));
-        assert_eq!(generator.next(), Some("c".to_string()));
+        let og_string = "abc".to_string();
+        let mut generator = SubsequenceGenerator::new(og_string.as_bytes());
+        assert_eq!(
+            generator.next(),
+            Some("abc".to_string().as_bytes().to_vec())
+        );
+        assert_eq!(generator.next(), Some("ab".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("ac".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("a".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("bc".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("b".to_string().as_bytes().to_vec()));
+        assert_eq!(generator.next(), Some("c".to_string().as_bytes().to_vec()));
 
         assert_eq!(generator.next(), None);
     }
