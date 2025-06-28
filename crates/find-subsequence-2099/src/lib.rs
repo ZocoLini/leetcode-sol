@@ -1,4 +1,4 @@
-struct Solution;
+pub struct Solution;
 
 impl Solution {
     pub fn max_subsequence(nums: Vec<i32>, k: i32) -> Vec<i32> {
@@ -34,6 +34,23 @@ impl Solution {
         output.sort_by_key(|item| item.1);
 
         output.iter().map(|(n, _)| *n).collect::<Vec<i32>>()
+    }
+
+    pub fn max_subsequence_leetcode(nums: Vec<i32>, k: i32) -> Vec<i32> {
+        let n = nums.len();
+        let mut vals: Vec<(usize, i32)> = Vec::new(); // auxiliary array
+        for i in 0..n {
+            vals.push((i, nums[i]));
+        }
+        // sort by numerical value in descending order
+        vals.sort_by(|x1, x2| x2.1.cmp(&x1.1));
+        // select the first k elements and sort them in ascending order by index
+        vals[0..k as usize].sort_by(|x1, x2| x1.0.cmp(&x2.0));
+        let mut res: Vec<i32> = Vec::new(); // target subsequence
+        for i in 0..k as usize {
+            res.push(vals[i].1);
+        }
+        res
     }
 }
 
