@@ -12,7 +12,7 @@ impl Solution {
 
         while num > 0 {
             digits.push(num % 10);
-            num = num / 10;
+            num /= 10;
         }
 
         let permutaciones = permutaciones(digits);
@@ -52,7 +52,7 @@ fn generar<T: Clone>(data: &mut Vec<T>, n: usize, resultados: &mut Vec<Vec<T>>) 
     } else {
         for i in 0..n {
             generar(data, n - 1, resultados);
-            if n % 2 == 0 {
+            if n.is_multiple_of(2) {
                 data.swap(i, n - 1);
             } else {
                 data.swap(0, n - 1);

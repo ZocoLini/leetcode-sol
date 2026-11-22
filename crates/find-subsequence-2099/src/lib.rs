@@ -20,9 +20,9 @@ impl Solution {
         for (i, n) in nums_iter {
             let mut lowest = (i32::MAX, 0);
 
-            for j in 0..output.len() {
-                if output[j].0 < *n && output[j].0 < lowest.0 {
-                    lowest = (output[j].0, j as u16);
+            for (j, item) in output.iter().enumerate() {
+                if item.0 < *n && item.0 < lowest.0 {
+                    lowest = (item.0, j as u16);
                 }
             }
 
@@ -37,20 +37,12 @@ impl Solution {
     }
 
     pub fn max_subsequence_leetcode(nums: Vec<i32>, k: i32) -> Vec<i32> {
-        let n = nums.len();
-        let mut vals: Vec<(usize, i32)> = Vec::new(); // auxiliary array
-        for i in 0..n {
-            vals.push((i, nums[i]));
-        }
+        let mut vals: Vec<(usize, i32)> = nums.into_iter().enumerate().collect(); // auxiliary array
         // sort by numerical value in descending order
-        vals.sort_by(|x1, x2| x2.1.cmp(&x1.1));
+        vals.sort_by_key(|x| std::cmp::Reverse(x.1));
         // select the first k elements and sort them in ascending order by index
-        vals[0..k as usize].sort_by(|x1, x2| x1.0.cmp(&x2.0));
-        let mut res: Vec<i32> = Vec::new(); // target subsequence
-        for i in 0..k as usize {
-            res.push(vals[i].1);
-        }
-        res
+        vals[0..k as usize].sort_by_key(|x1| x1.0);
+        vals[0..k as usize].iter().map(|x| x.1).collect() // target subsequence
     }
 }
 

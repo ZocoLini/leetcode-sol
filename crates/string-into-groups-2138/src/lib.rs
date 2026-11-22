@@ -9,8 +9,7 @@ impl Solution {
 
         let mut s_chars = s.chars();
 
-        for group_index in 0..groups_len {
-            let mut actual_group = &mut output[group_index];
+        for actual_group in output.iter_mut() {
             for i in 0..k {
                 actual_group.push(if let Some(c) = s_chars.next() {
                     c

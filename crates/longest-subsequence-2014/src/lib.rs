@@ -13,8 +13,7 @@ impl Solution {
 
         let mut valid_chars = s
             .chars()
-            .into_iter()
-            .filter(|ch| s.chars().into_iter().filter(|c| c == ch).count() >= k as usize)
+            .filter(|ch| s.chars().filter(|c| c == ch).count() >= k as usize)
             .collect::<HashSet<_>>()
             .into_iter()
             .map(|ch| ch as u8)
@@ -62,7 +61,7 @@ impl Solution {
             }
         }
 
-        best_result.to_string()
+        best_result.into_string()
     }
 }
 
@@ -104,7 +103,7 @@ impl BestResult {
         }
     }
 
-    fn to_string(self) -> String {
+    fn into_string(self) -> String {
         String::from_utf8(self.best_result).unwrap()
     }
 }
@@ -140,10 +139,10 @@ where
     type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(iter) = self.permutations_iter.as_mut() {
-            if let Some(perm) = iter.next() {
-                return Some(perm);
-            }
+        if let Some(iter) = self.permutations_iter.as_mut()
+            && let Some(perm) = iter.next()
+        {
+            return Some(perm);
         }
 
         let mask = self.numbers.pop().unwrap();
@@ -155,19 +154,15 @@ where
         let mut vec = vec![];
 
         for (i, item) in self.items_iter.clone() {
-            let item_pos = 1 << self.start_index - i;
+            let item_pos = 1 << (self.start_index - i);
             if item_pos & mask > 0 {
-                vec.push(item.clone());
+                vec.push(*item);
             }
         }
 
         let mut iterator = PermutationIterator::new(&vec);
 
-        let val = if let Some(perm) = iterator.next() {
-            Some(perm)
-        } else {
-            None
-        };
+        let val = iterator.next();
 
         self.permutations_iter = Some(iterator);
 

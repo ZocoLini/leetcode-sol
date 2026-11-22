@@ -18,7 +18,7 @@ fn compare_bench(c: &mut Criterion) {
         );
     });
 
-    fn compare(word1: &String, word2: &String) -> bool {
+    fn compare(word1: &str, word2: &str) -> bool {
         let mut freq = [0; 26];
         for ch in word1.chars() {
             freq[(ch as u8 - b'a') as usize] += 1;
@@ -57,7 +57,7 @@ fn solution_bench(c: &mut Criterion) {
                     "d".to_string(),
                 ]
             },
-            |vec| remove_anagrams(vec),
+            remove_anagrams,
             criterion::BatchSize::SmallInput,
         );
     });
@@ -78,7 +78,7 @@ fn solution_bench(c: &mut Criterion) {
                     "d".to_string(),
                 ]
             },
-            |vec| find_resultant_array_2273::Solution::remove_anagrams(vec),
+            find_resultant_array_2273::Solution::remove_anagrams,
             criterion::BatchSize::SmallInput,
         );
     });
@@ -88,7 +88,7 @@ fn solution_bench(c: &mut Criterion) {
         let n = words.len();
 
         // determine if two words are anagrams
-        fn compare(word1: &String, word2: &String) -> bool {
+        fn compare(word1: &str, word2: &str) -> bool {
             let mut freq = [0; 26];
             for ch in word1.chars() {
                 freq[(ch as u8 - b'a') as usize] += 1;
