@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# shellcheck source=.githooks/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+step "Clippy"
+need cargo
+
+lints="$(cargo clippy --workspace --all-targets --all-features -- -D warnings 2>&1)" ||
+  fail "clippy is unhappy.
+
+$lints"
+
+passed "Clippy passed"

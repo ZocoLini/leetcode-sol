@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# shellcheck source=.githooks/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+formatting
+step "Formatting"
+need cargo shfmt taplo mdformat
+
+cargo fmt --all
+ok "rust"
+
+owned SH_FILES '(\.sh$|^\.githooks/)'
+shfmt --write --indent 2 --case-indent "${SH_FILES[@]}" >/dev/null
+ok "shell"
+
+owned TOML_FILES '\.toml$'
+RUST_LOG=error taplo fmt "${TOML_FILES[@]}" >/dev/null
+ok "toml"
+
+owned MD_FILES '\.md$'
+[ "${#MD_FILES[@]}" -eq 0 ] || mdformat "${MD_FILES[@]}"
+ok "markdown"
+
+formatted

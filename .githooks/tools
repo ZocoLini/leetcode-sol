@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# shellcheck source=.githooks/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+need docker
+
+image="leetcode-tools:$(git hash-object tools.dockerfile | cut -c1-12)"
+
+if ! docker image inspect "$image" >/dev/null 2>&1; then
+  step "Building $image"
+  docker build --quiet --file tools.dockerfile --tag "$image" . >/dev/null
+fi
+
+terminal=()
+[ -t 1 ] && terminal=(--tty)
+
+exec docker run --rm "${terminal[@]}" --volume "$ROOT:/repo" --workdir /repo "$image" "$@"

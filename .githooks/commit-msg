@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# shellcheck source=.githooks/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+subject="$(head -n1 "$1")"
+
+[[ "$subject" =~ ^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\([a-z0-9-]+\))?!?:\ .+ ]] ||
+  [[ "$subject" =~ ^Merge\  ]] ||
+  fail "Commit message must follow Conventional Commits, e.g. 'feat: add x' or 'fix(2099): handle y'.
+
+Got: $subject"
