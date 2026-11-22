@@ -7,3 +7,6 @@ members = [
     "crates/reorder-power-of-2-869",
     "crates/string-into-groups-2138",
 ]
+
+[workspace.dependencies]
+criterion = "0.5.1"
