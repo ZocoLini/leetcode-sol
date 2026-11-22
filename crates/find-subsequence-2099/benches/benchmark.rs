@@ -1,10 +1,6 @@
-#![feature(test)]
-extern crate test;
-
+use criterion::{Bencher, Criterion, criterion_group, criterion_main};
 use find_subsequence_2099::Solution;
-use test::Bencher;
 
-#[bench]
 fn benching_500_elements_my_method(b: &mut Bencher) {
     b.iter(|| {
         Solution::max_subsequence(
@@ -113,7 +109,6 @@ fn benching_500_elements_my_method(b: &mut Bencher) {
     });
 }
 
-#[bench]
 fn benching_500_elements_leetcode_method(b: &mut Bencher) {
     b.iter(|| {
         Solution::max_subsequence_leetcode(
@@ -221,3 +216,11 @@ fn benching_500_elements_leetcode_method(b: &mut Bencher) {
         )
     });
 }
+
+fn benches(c: &mut Criterion) {
+    c.bench_function("my_method", benching_500_elements_my_method);
+    c.bench_function("leetcode_method", benching_500_elements_leetcode_method);
+}
+
+criterion_group!(group, benches);
+criterion_main!(group);
