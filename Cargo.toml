@@ -8,5 +8,8 @@ members = [
     "crates/string-into-groups-2138",
 ]
 
+[workspace.package]
+version = "0.1.0"
+
 [workspace.dependencies]
 criterion = "0.5.1"

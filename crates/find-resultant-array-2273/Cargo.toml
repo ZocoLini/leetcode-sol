@@ -1,6 +1,6 @@
 [package]
 name = "find-resultant-array-2273"
-version = "0.1.0"
+version.workspace = true
 edition = "2024"
 
 [dependencies]
