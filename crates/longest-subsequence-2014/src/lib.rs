@@ -165,26 +165,30 @@ where
 
         let val = if let Some(perm) = iterator.next() {
             Some(perm)
-        } else { 
+        } else {
             None
         };
-        
+
         self.permutations_iter = Some(iterator);
-        
+
         val
     }
 }
 
 struct PermutationIterator<T>
-where T: Copy + Clone {
+where
+    T: Copy + Clone,
+{
     chars: Vec<T>,
     c: Vec<usize>,
     i: usize,
     first: bool,
 }
 
-impl<T> PermutationIterator<T> 
-where T: Copy + Clone {
+impl<T> PermutationIterator<T>
+where
+    T: Copy + Clone,
+{
     pub fn new(input: &[T]) -> Self {
         let n = input.len();
         Self {
@@ -196,8 +200,10 @@ where T: Copy + Clone {
     }
 }
 
-impl<T> Iterator for PermutationIterator<T> 
-where T: Copy + Clone {
+impl<T> Iterator for PermutationIterator<T>
+where
+    T: Copy + Clone,
+{
     type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -266,11 +272,26 @@ mod tests {
             generator.next(),
             Some("abc".to_string().as_bytes().to_vec())
         );
-        assert_eq!(generator.next(), Some("bac".to_string().as_bytes().to_vec()));
-        assert_eq!(generator.next(), Some("cab".to_string().as_bytes().to_vec()));
-        assert_eq!(generator.next(), Some("acb".to_string().as_bytes().to_vec()));
-        assert_eq!(generator.next(), Some("bca".to_string().as_bytes().to_vec()));
-        assert_eq!(generator.next(), Some("cba".to_string().as_bytes().to_vec()));
+        assert_eq!(
+            generator.next(),
+            Some("bac".to_string().as_bytes().to_vec())
+        );
+        assert_eq!(
+            generator.next(),
+            Some("cab".to_string().as_bytes().to_vec())
+        );
+        assert_eq!(
+            generator.next(),
+            Some("acb".to_string().as_bytes().to_vec())
+        );
+        assert_eq!(
+            generator.next(),
+            Some("bca".to_string().as_bytes().to_vec())
+        );
+        assert_eq!(
+            generator.next(),
+            Some("cba".to_string().as_bytes().to_vec())
+        );
         assert_eq!(generator.next(), Some("ab".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("ba".to_string().as_bytes().to_vec()));
         assert_eq!(generator.next(), Some("ac".to_string().as_bytes().to_vec()));

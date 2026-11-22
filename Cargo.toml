@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/find-resultant-array-2273",
-    "crates/find-subsequence-2099",
-    "crates/longest-subsequence-2014",
-    "crates/reorder-power-of-2-869",
-    "crates/string-into-groups-2138",
+  "crates/find-resultant-array-2273",
+  "crates/find-subsequence-2099",
+  "crates/longest-subsequence-2014",
+  "crates/reorder-power-of-2-869",
+  "crates/string-into-groups-2138",
 ]
 
 [workspace.package]
