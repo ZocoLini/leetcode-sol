@@ -1,0 +1,7 @@
+[package]
+name = "check-a-and-b-2124"
+edition = "2024"
+version.workspace = true
+
+[dev-dependencies]
+test-case = { workspace = true }

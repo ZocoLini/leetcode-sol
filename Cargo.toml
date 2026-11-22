@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/check-a-and-b-2124",
   "crates/find-resultant-array-2273",
   "crates/find-subsequence-2099",
-  "crates/longest-subsequence-2014",
   "crates/reorder-power-of-2-869",
   "crates/string-into-groups-2138",
 ]
@@ -13,3 +13,4 @@ version = "0.1.0"
 
 [workspace.dependencies]
 criterion = "0.5.1"
+test-case = "3.4.1"

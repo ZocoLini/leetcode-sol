@@ -1,4 +1,0 @@
-[package]
-name = "longest-subsequence-2014"
-version.workspace = true
-edition = "2024"
