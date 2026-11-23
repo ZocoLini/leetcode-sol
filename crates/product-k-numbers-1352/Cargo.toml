@@ -1,0 +1,7 @@
+[package]
+name = "product-k-numbers-1352"
+edition = "2024"
+version.workspace = true
+
+[dev-dependencies]
+test-case = { workspace = true }
